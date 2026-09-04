@@ -1054,8 +1054,7 @@ function enviarParaServidor(conteudo, liberacao) {
  const linkTokenDev = document.getElementById('lnkTokenDev');
  const linkAlterarRom = document.getElementById('lnkAlterarRom');
 
- // 🌟 INJEÇÃO CIRÚRGICA: DEFESA DE CONCORRÊNCIA SEQUENCIAL (ANTI-TIMEOUT)
- // Se o operador estiver tentando subir o 2º arquivo muito rápido, calcula o tempo restante de segurança
+ // DEFESA DE CONCORRÊNCIA SEQUENCIAL (ANTI-TIMEOUT)
  const agoraTimestamp = Date.now();
  const tempoDecorridoDesdeUltimo = agoraTimestamp - TIMESTAMP_ULTIMO_UPLOAD_SUCESSO;
  const tempoEsperaObrigatorio = 12000; // 12 segundos mínimos de respiro para o Google liberar as travas da Master
@@ -1069,14 +1068,13 @@ function enviarParaServidor(conteudo, liberacao) {
    const tempoRestanteSegundos = Math.ceil((tempoEsperaObrigatorio - tempoDecorridoDesdeUltimo) / 1000);
    exibirAviso('statusEnvio', `Aguardando liberação de canal do Google (${tempoRestanteSegundos}s)...`, 'loading');
    
-   // Agenda o envio automaticamente para daqui a poucos segundos, evitando o estouro de internet
    setTimeout(function() {
      enviarParaServidor(conteudo, liberacao);
    }, (tempoEsperaObrigatorio - tempoDecorridoDesdeUltimo));
    return;
  }
 
- // 3. BLOQUEIO RÍGIDO DE TODOS OS COMANDOS (Anti-duplo clique operacional)
+ // 3. BLOQUEIO RÍGIDO DE TODOS OS COMANDOS
  btn.disabled = true;
  btn.innerHTML = '<div class="spinner"></div> Aguarde Processamento...';
  if (fileInput) fileInput.disabled = true;
@@ -1106,7 +1104,7 @@ function enviarParaServidor(conteudo, liberacao) {
    uf: UF_SELECIONADA 
  };
  
- // Disparo HTTP POST em modo texto plano direcionado ao Web App
+ // Disparo HTTP POST direcionado ao Web App
  fetch(WEB_APP_URL, {
    method: 'POST',
    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1187,7 +1185,7 @@ function enviarParaServidor(conteudo, liberacao) {
      if (fileInput) fileInput.value = ''; 
      
    } else if (statusLimpo === "OK" || statusLimpo === "SUCCESS" || isTrueSuccess || textoMensagem !== "") {
-     // 🌟 CARIMBA O SUCESSO: Salva o timestamp exato do encerramento com sucesso para controlar o próximo envio sequencial
+     // CARIMBA O SUCESSO: Controla a fila sequencial
      TIMESTAMP_ULTIMO_UPLOAD_SUCESSO = Date.now();
 
      document.getElementById('modalTitulo').innerText = "Excelente!";
@@ -1220,7 +1218,7 @@ function enviarParaServidor(conteudo, liberacao) {
    }
  })
  .catch(err => {
-   // REVERTE AS TRAVAS OPERACIONAIS EM CASO DE FALHA DE CONEXÃO FÍSICA [cite: ]
+   // REVERTE AS TRAVAS OPERACIONAIS EM CASO DE FALHA DE CONEXÃO FÍSICA
    if (fileInput) fileInput.disabled = false;
    if (selectLiberacao) selectLiberacao.disabled = false;
    if (linkPendentes) {
@@ -1238,13 +1236,14 @@ function enviarParaServidor(conteudo, liberacao) {
    
    btn.disabled = false;
    btn.innerHTML = 'Enviar Base';
-   exibirAviso('statusEnvio', 'Falha na comunicação: Verifique sua internet.', 'error'); [cite: ]
-   console.error("Erro crítico de conexão de rede:", err); [cite: ]
+   exibirAviso('statusEnvio', 'Falha na comunicação: Verifique sua internet.', 'error');
+   console.error("Erro crítico de conexão de rede:", err);
    if (typeof dispararLogOL === 'function') {
-     dispararLogOL('ENVIO_CARGA_ERRO_REDE', `Queda física de comunicação ou timeout. Detalhes: [${err.toString()}]`); [cite: ]
+     dispararLogOL('ENVIO_CARGA_ERRO_REDE', `Queda física de comunicação ou timeout. Detalhes: [${err.toString()}]`);
    }
  });
 }
+
 
 
 
